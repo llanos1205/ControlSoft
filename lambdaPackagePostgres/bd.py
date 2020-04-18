@@ -1,36 +1,33 @@
 import psycopg2
 import rds_config
-def Creater():
+def Creater(Query):
     conn=None
     cursor=None
+    response="noting happened"
     try:
-        conn = psycopg2.connect( host=rds_config.db_host,
-          database=rds_config.db_name,
-          user=rds_config.db_user,
-          password=rds_config.db_password)
+        conn = psycopg2.connect( 
+        host=rds_config.db_host,
+        database=rds_config.db_name,
+        user=rds_config.db_user,
+        password=rds_config.db_password
+        )
         cursor = conn.cursor()
-        Query = """ CREATE TABLE role(
-	    role_id serial PRIMARY KEY,
-	    role_name VARCHAR (255) UNIQUE NOT None
-            )    """
-
- 
         cursor.executemany(Query)
         conn.commit()
-        print(cursor.rowcount, "Registros insertados correctamente!!")
-
+        response="Success"
     except (Exception, psycopg2.Error) as error:
-        print("Error al insertar registros {}".format(error))
+        response="something wrong happened"
+        #write error to CW
 
     finally:
         if (conn):
             cursor.close()
             conn.close()
-    return "SUccess"
+    return response
 
 
 
-def Insertar(registros):
+def Insertar(Query):
     conn=None
     cursor=None
     try:
@@ -39,11 +36,7 @@ def Insertar(registros):
           user=rds_config.db_user,
           password=rds_config.db_password)
         cursor = conn.cursor()
-        Query = """ INSERT INTO persona (idpersona, nombre, carnet) 
-                           VALUES (%s,%s,%s) """
-
- 
-        cursor.executemany(Query, registros)
+        cursor.executemany(Query)
         conn.commit()
         print(cursor.rowcount, "Registros insertados correctamente!!")
 
