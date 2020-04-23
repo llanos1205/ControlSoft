@@ -1,11 +1,12 @@
-
+import logging
 import db
 import json
 #nota body y httpmetod soloe stan habilitados si se usalambda proxy integration
 
 
 CONN=None
-
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 def handler(event, context):
     # responde=bd.Creater()
     method = event['requestContext']['httpMethod']
@@ -17,6 +18,7 @@ def handler(event, context):
     global CONN
     if(CONN is None):
         CONN=db.Connect()
+        logger.info("SUCCESS: Connection to RDS MySQL instance succeeded")
     if(method == "GET"):
         try:
             response=db.queryData(CONN,"SELECT * FROM role2")
