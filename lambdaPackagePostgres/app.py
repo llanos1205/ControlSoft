@@ -1,21 +1,25 @@
 
 import db
-
+import json
 #nota body y httpmetod soloe stan habilitados si se usalambda proxy integration
+
+
+CONN=None
+
 def handler(event, context):
     # responde=bd.Creater()
     method = event['requestContext']['httpMethod']
     error={
                 'statusCode': 500,
-                'body': "Error al insertar registros"
+                'body': "error alguna parte"
             }
     response=None
+    global CONN
+    if(CONN is None):
+        CONN=db.Connect()
     if(method == "GET"):
         try:
-     #       esponse=db.Creater("""CREATE TABLE role2(
-	#role_id serial PRIMARY KEY,
-	#role_name VARCHAR (255) UNIQUE NOT NULL);""")
-            response=db.queryData("SELECT * FROM role2")
+            response=db.queryData(CONN,"SELECT * FROM role2")
             return {
                 'statusCode': 200,
                 'body': response
@@ -25,14 +29,15 @@ def handler(event, context):
         
     elif(method == "POST"):
         try:
-            query="INSERT INTO role2(role_name) VALUES('{0}');".format(event['body']['role_name'])
-            response=db.insertData(query)
+            body=json.loads(event['body'])
+            query="INSERT INTO role2(role_name) VALUES('{0}');".format(body['role_name'])
+            response=db.insertData(CONN,query)
             return {
                 'statusCode': 200,
                 'body': response
-            }
-        except:
-            return error
+            } 
+        except Exception as x: 
+            return x
     elif(method == "PUT"):
         return {
             'statusCode': 200,
@@ -41,7 +46,7 @@ def handler(event, context):
     elif(method == "DELETE"):
         return {
             'statusCode': 200,
-            'body': "thisisa delete method"
+            'body': "thisisa delet method"
         }
     elif(method == "PATCH"):
         return {
