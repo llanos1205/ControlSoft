@@ -1,12 +1,16 @@
+# When a user needs to sign in, he/she has to decide on their primary email id and a password of atleast 8 characters long. 
+# The lambda function which will handle new user registration.
 import boto3
 import botocore.exceptions
 import hmac
 import hashlib
 import base64
 import json
-USER_POOL_ID = ''
-CLIENT_ID = ''
-CLIENT_SECRET = ''
+import Cognito_Config
+USER_POOL_ID = Cognito_Config.Pool_Id
+CLIENT_ID = Cognito_Config.Pool_AppClient_Id
+CLIENT_SECRET = Cognito_Config.Pool_AppClient_Secret
+
 def get_secret_hash(username):
     msg = username + CLIENT_ID
     dig = hmac.new(str(CLIENT_SECRET).encode('utf-8'), 
