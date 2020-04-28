@@ -1,4 +1,6 @@
-Pool_Id= "us-east-1_uFkszoDrc"
-Pool_ARN="arn:aws:cognito-idp:us-east-1:188759327284:userpool/us-east-1_uFkszoDrc"
-Pool_AppClient_Id="7cjceqnms1v9363ao9itm9n7h5"
-Pool_AppClient_Secret="2lkaf3ie8b5lsu4g1vrje8cgvk10pro2cfntlvjfvsagd8h4p22"
+import os
+Pool_Id= os.environ['Pool_Id']
+Pool_ARN=os.environ['Pool_ARN']
+Pool_AppClient_Id=os.environ['Pool_AppClient_Id']
+Pool_AppClient_Secret=os.environ['Pool_AppClient_Secret']
+#try to change for Sys Manager

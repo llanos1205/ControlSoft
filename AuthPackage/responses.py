@@ -1,7 +1,7 @@
 import json
-def Response(StatusCode,Body,hdrs):
+def Response(StatusCode,Body,hdrs:dict={ "Content-Type": "application/json"}):
     return{
         'statusCode':StatusCode,
-        'headers':hdrs,
-        'body':json.dumps(Body)
+        'body':json.dumps(Body),
+        'headers':hdrs
     }
