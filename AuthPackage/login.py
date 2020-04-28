@@ -5,6 +5,7 @@ import hashlib
 import base64
 import json
 import Cognito_Config
+import responses
 USER_POOL_ID = Cognito_Config.Pool_Id
 CLIENT_ID = Cognito_Config.Pool_AppClient_Id
 CLIENT_SECRET = Cognito_Config.Pool_AppClient_Secret
@@ -45,19 +46,19 @@ def initiate_auth(client, username, password):
 
 def lambda_handler(event, context):
     client = boto3.client('cognito-idp')
-    body=event
+    data = json.loads(event['body'])
     for field in ["username", "password"]:
-        if event.get(field) is None:
+        if data.get(field) is None:
             return {"error": True,
                     "success": False,
                     "message": f"{field} is required",
                     "data": None}
-    resp, msg = initiate_auth(client, body['username'], body['password'])
+    resp, msg = initiate_auth(client, data['username'], data['password'])
     if msg != None:
-        return {'message': msg,
-                "error": True, "success": False, "data": None}
+        return responses.Response(400,{'message': msg,
+                "error": True, "success": False, "data": None},{})
     if resp.get("AuthenticationResult"):
-        return {'message': "success",
+        return responses.Response(200,{'message': "success",
                 "error": False,
                 "success": True,
                 "data": {
@@ -66,8 +67,8 @@ def lambda_handler(event, context):
                     "access_token": resp["AuthenticationResult"]["AccessToken"],
                     "expires_in": resp["AuthenticationResult"]["ExpiresIn"],
                     "token_type": resp["AuthenticationResult"]["TokenType"]
-                }}
+                }},{})
     else:  # this code block is relevant only when MFA is enabled
-        return {"error": True,
+        return responses.Response(200,{"error": True,
                 "success": False,
-                "data": None, "message": None}
+                "data": None, "message": None},{})
