@@ -1,0 +1,67 @@
+import logging
+import db
+import json
+from responses import Response, getBody
+import scripts
+
+# nota body y httpmetod soloe stan habilitados si se usalambda proxy integration
+
+
+CONN = None
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+
+def handler(event, context):
+    method = event['requestContext']['httpMethod']
+    response = None
+    global CONN
+
+    if CONN is None:
+        CONN = db.Connect()
+        logger.info("SUCCESS: Connection to RDS MySQL instance succeeded")
+
+    if method == "GET":
+        try:
+            cursor = db.queryData(CONN, scripts.get_query.format(keys="name,type", table="invitado"))
+            resp = db.getJson(cursor)
+            return Response(200, resp)
+        except Exception as error:
+            logger.error("ERROR:Quering Failed with error {0}", str(error))
+            return Response(500, "Internal Errol")
+
+    elif method == "POST":
+        try:
+            body = getBody(event)
+            keys, values = scripts.key_value_parser(body)
+            query = scripts.put_query.format(table="invitado", keys=keys, values=values)
+            cursor = db.queryData(CONN, query)
+            return Response(200, "Insert Success")
+        except Exception as error:
+            logger.error("ERROR:Insertion Failed with error {0}", str(error))
+            return Response(500, "Internal Error")
+    elif method == "PUT":
+
+        try:
+            body = getBody(event)
+            query = scripts.update_query.format(table="invitado", changes="", cond="")
+            cursor = db.queryData(CONN, query)
+
+        except Exception as error:
+            logger.error("ERROR:Insertion Failed with error {0}", str(error))
+            return Response(500, "Internal Error")
+    elif method == "DELETE":
+        return {
+            'statusCode': 200,
+            'body': "thisisa delet method"
+        }
+    elif method == "PATCH":
+        return {
+            'statusCode': 200,
+            'body': "thisisa patch method"
+        }
+    else:
+        return {
+            'statusCode': 404,
+            'body': "unhandled method"
+        }
