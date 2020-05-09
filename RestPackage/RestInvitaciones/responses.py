@@ -10,7 +10,10 @@ def Response(statusCode, body, hdrs: dict = {"Content-Type": "application/json"}
 
 
 def getBody(event):
-    if type(event['body']) is str:
-        return json.loads(event['body'])
+    if 'body' in event.keys():
+        if type(event['body']) is str:
+            return json.loads(event['body'])
+        else:
+            return event['body']
     else:
-        return event['body']
+        return None

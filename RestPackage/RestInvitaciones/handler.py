@@ -3,10 +3,10 @@ import db
 import json
 from responses import Response, getBody
 import scripts
-
+import boto3
 # nota body y httpmetod soloe stan habilitados si se usalambda proxy integration
 
-
+client=boto3.client('sns')
 CONN = None
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -23,7 +23,12 @@ def handler(event, context):
 
     if method == "GET":
         try:
-            cursor = db.queryData(CONN, scripts.get_query.format(keys="idinvitacion,fechainvitacion,fechadeexpiracion,estado,horamaxentrada,horamaxsalida,codigoinvitacion", table="invitacion",cond="" ))
+            id=None
+            cond=""
+            if('idinvitacion' in event['pathParameters']):
+                id=event['pathParameters']['idinvitacion']
+                cond="where idinvitacion={}".format(id)
+            cursor = db.queryData(CONN, scripts.get_query.format(keys="idinvitacion,idinvitado,idresidente,fechainvitacion,fechadeexpiracion,estado,horamaxentrada,horamaxsalida,codigoinvitacion", table="invitacion",cond=cond))
             resp = db.getJson(cursor)
             return Response(200, resp)
         except Exception as error:
@@ -35,7 +40,21 @@ def handler(event, context):
             body = getBody(event)
             keys, values = scripts.key_value_parser(body)
             query = scripts.put_query.format(table="invitacion", keys=keys, values=values)
+            #proceso de crear un link/QR mejor usar SNS
             cursor = db.queryData(CONN, query)
+            # client.publish(
+            #     PhoneNumber='string',
+            #     Message='lok',
+            #     Subject='string',
+            #     MessageStructure='string',
+            #     MessageAttributes={
+            #         'string': {
+            #             'DataType': 'string',
+            #             'StringValue': 'string',
+            #             'BinaryValue': b'bytes'
+            #         }
+            #     }
+            # )
             return Response(200, "Insert Success")
         except Exception as error:
             logger.error('ERROR:Insertion Failed with error {}'.format(str(error)))
