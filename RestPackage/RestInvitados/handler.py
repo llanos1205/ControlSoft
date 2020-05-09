@@ -46,22 +46,27 @@ def handler(event, context):
             body = getBody(event)
             query = scripts.update_query.format(table="invitado", changes="", cond="")
             cursor = db.queryData(CONN, query)
-
+            return Response(200, "Changes effective")
         except Exception as error:
-            logger.error("ERROR:Insertion Failed with error {0}", str(error))
+            logger.error("ERROR:Modification Failed with error {0}", str(error))
             return Response(500, "Internal Error")
     elif method == "DELETE":
-        return {
-            'statusCode': 200,
-            'body': "thisisa delet method"
-        }
+        try:
+            body = getBody(event)
+            query = scripts.delete_query.format(table="invitado", cond="")
+            cursor = db.queryData(CONN, query)
+            return Response(200, "Changes effective")
+        except Exception as error:
+            logger.error("ERROR:Deletion Failed with error {0}", str(error))
+            return Response(500, "Internal Error")
     elif method == "PATCH":
-        return {
-            'statusCode': 200,
-            'body': "thisisa patch method"
-        }
+        try:
+            body = getBody(event)
+            query = scripts.update_query.format(table="invitado", changes="", cond="")
+            cursor = db.queryData(CONN, query)
+            return Response(200, "Changes effective")
+        except Exception as error:
+            logger.error("ERROR:Deletion Failed with error {0}", str(error))
+            return Response(500, "Internal Error")
     else:
-        return {
-            'statusCode': 404,
-            'body': "unhandled method"
-        }
+        return Response(404,"No managed method")
