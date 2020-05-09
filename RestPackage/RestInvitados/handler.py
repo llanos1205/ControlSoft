@@ -23,11 +23,11 @@ def handler(event, context):
 
     if method == "GET":
         try:
-            cursor = db.queryData(CONN, scripts.get_query.format(keys="name,type", table="invitado"))
+            cursor = db.queryData(CONN, scripts.get_query.format(keys="idinvitado,nombre1nombre2,apellido1,apellido2,fechanacimiento,sexo,correo,nrotelefono,nrocarnet", table="invitado"))
             resp = db.getJson(cursor)
             return Response(200, resp)
         except Exception as error:
-            logger.error("ERROR:Quering Failed with error {0}", str(error))
+            logger.error("ERROR:Quering Failed with error {}".format(str(error)))
             return Response(500, "Internal Errol")
 
     elif method == "POST":
@@ -38,7 +38,7 @@ def handler(event, context):
             cursor = db.queryData(CONN, query)
             return Response(200, "Insert Success")
         except Exception as error:
-            logger.error("ERROR:Insertion Failed with error {0}", str(error))
+            logger.error('ERROR:Insertion Failed with error {}'.format(str(error)))
             return Response(500, "Internal Error")
     elif method == "PUT":
 
@@ -48,25 +48,25 @@ def handler(event, context):
             cursor = db.queryData(CONN, query)
             return Response(200, "Changes effective")
         except Exception as error:
-            logger.error("ERROR:Modification Failed with error {0}", str(error))
+            logger.error("ERROR:Modification Failed with error {}".format(str(error)))
             return Response(500, "Internal Error")
     elif method == "DELETE":
         try:
             body = getBody(event)
-            query = scripts.delete_query.format(table="invitado", cond="")
+            query = scripts.delete_query.format(table="invitado", cond="idinvitado={}".format(body['idinvitado']))
             cursor = db.queryData(CONN, query)
             return Response(200, "Changes effective")
         except Exception as error:
-            logger.error("ERROR:Deletion Failed with error {0}", str(error))
+            logger.error("ERROR:Deletion Failed with error {}".format(str(error)))
             return Response(500, "Internal Error")
     elif method == "PATCH":
         try:
             body = getBody(event)
-            query = scripts.update_query.format(table="invitado", changes="", cond="")
+            query = scripts.update_query.format(table="invitado", changes="",cond="idinvitado={}".format(body['idinvitado']))
             cursor = db.queryData(CONN, query)
             return Response(200, "Changes effective")
         except Exception as error:
-            logger.error("ERROR:Deletion Failed with error {0}", str(error))
+            logger.error("ERROR:Deletion Failed with error {}".format(str(error)))
             return Response(500, "Internal Error")
     else:
         return Response(404,"No managed method")
