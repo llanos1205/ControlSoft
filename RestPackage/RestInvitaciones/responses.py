@@ -1,7 +1,7 @@
 import json
 
 
-def Response(statusCode, body, hdrs: dict = {"Content-Type": "application/json"}):
+def responseAgw(statusCode, body, hdrs: dict = {"Content-Type": "application/json"}):
     return {
         'statusCode': statusCode,
         'body': json.dumps(body),
