@@ -28,12 +28,13 @@ def queryData(conn, Query):
     try:
         cursor = conn.cursor(cursor_factory=RealDictCursor)
         cursor.execute(Query)
-        for queryType in ["INSERT", "UPDATE","DELETE","PATCH"]:
+        for queryType in ["INSERT", "UPDATE","DELETE","PATCH","insert", "update","delete","patch"]:
             if queryType in Query:
                 conn.commit()
 
                 break
     except (Exception, psycopg2.Error) as error:
+        logger.error(Query)
         logger.error("ERROR:Quering Failed with error {0}", str(error))
     return cursor
 
