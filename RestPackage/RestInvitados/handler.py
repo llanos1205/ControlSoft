@@ -1,11 +1,7 @@
 import logging
 import db
-import json
-from responses import Response, getBody
+from responses import responseAgw, getBody
 import scripts
-
-# nota body y httpmetod soloe stan habilitados si se usalambda proxy integration
-
 
 CONN = None
 logger = logging.getLogger()
@@ -15,58 +11,78 @@ logger.setLevel(logging.INFO)
 def handler(event, context):
     method = event['requestContext']['httpMethod']
     response = None
+    query = None
     global CONN
 
     if CONN is None:
-        CONN = db.Connect()
+        CONN = db.connect()
         logger.info("SUCCESS: Connection to RDS MySQL instance succeeded")
+
+    identifier = None
+    cond = ""
+    if event['pathParameters']:
+        if 'id' in event['pathParameters']:
+            identifier = event['pathParameters']['id']
 
     if method == "GET":
         try:
-            cursor = db.queryData(CONN, scripts.get_query.format(keys="idinvitado,nombre1nombre2,apellido1,apellido2,fechanacimiento,sexo,correo,nrotelefono,nrocarnet", table="invitado"))
+            if identifier:
+                cond = str("where idInvitacion={}".format(identifier))
+            keys = ""
+            query = scripts.getQuery.format(keys=keys, table="idInvitacion", cond=cond)
+
+            cursor = db.queryData(CONN, str(query))
             resp = db.getJson(cursor)
-            return Response(200, resp)
+            return responseAgw(200, resp)
         except Exception as error:
+
             logger.error("ERROR:Quering Failed with error {}".format(str(error)))
-            return Response(500, "Internal Errol")
+            return responseAgw(501, str(error))
 
     elif method == "POST":
         try:
             body = getBody(event)
-            keys, values = scripts.key_value_parser(body)
-            query = scripts.put_query.format(table="invitado", keys=keys, values=values)
-            cursor = db.queryData(CONN, query)
-            return Response(200, "Insert Success")
+            keys, values = scripts.keyValueParser(body)
+            query = scripts.putQuery.format(table="Invitacion", keys=keys, values=values)
+            # proceso de crear un link/QR mejor usar SNS
+            cursor = db.queryData(CONN, str(query))
+            return responseAgw(200, "Insert Success")
         except Exception as error:
+
             logger.error('ERROR:Insertion Failed with error {}'.format(str(error)))
-            return Response(500, "Internal Error")
+            return responseAgw(502, "Internal Error")
     elif method == "PUT":
 
         try:
             body = getBody(event)
-            query = scripts.update_query.format(table="invitado", changes="", cond="")
+            query = scripts.updateQuery.format(table="Invitacion", changes="", cond="")
             cursor = db.queryData(CONN, query)
-            return Response(200, "Changes effective")
+            return responseAgw(200, "Changes effective")
         except Exception as error:
             logger.error("ERROR:Modification Failed with error {}".format(str(error)))
-            return Response(500, "Internal Error")
+            return responseAgw(503, "Internal Error")
     elif method == "DELETE":
         try:
             body = getBody(event)
-            query = scripts.delete_query.format(table="invitado", cond="idinvitado={}".format(body['idinvitado']))
-            cursor = db.queryData(CONN, query)
-            return Response(200, "Changes effective")
+            if identifier:
+                cond = str("where idInvitacion={}".format(identifier))
+            query = scripts.deleteQuery.format(table="Invitacion", cond=cond)
+            cursor = db.queryData(CONN, str(query))
+            return responseAgw(200, "Changes effective")
         except Exception as error:
             logger.error("ERROR:Deletion Failed with error {}".format(str(error)))
-            return Response(500, "Internal Error")
+            return responseAgw(504, "Internal Error")
     elif method == "PATCH":
         try:
             body = getBody(event)
-            query = scripts.update_query.format(table="invitado", changes="",cond="idinvitado={}".format(body['idinvitado']))
-            cursor = db.queryData(CONN, query)
-            return Response(200, "Changes effective")
+            if identifier:
+                cond = str("idInvitacion={}".format(identifier))
+            changes = str(scripts.keyValueComparerParser(body))
+            query = scripts.updateQuery.format(table="Invitacion", changes=changes, cond=cond)
+            cursor = db.queryData(CONN, str(query))
+            return responseAgw(200, "Changes effective")
         except Exception as error:
             logger.error("ERROR:Deletion Failed with error {}".format(str(error)))
-            return Response(500, "Internal Error")
+            return responseAgw(505, str(error))
     else:
-        return Response(404,"No managed method")
+        return responseAgw(404, "No managed method")

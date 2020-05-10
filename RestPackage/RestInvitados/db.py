@@ -4,11 +4,12 @@ import psycopg2
 import rds_config
 import logging
 import sys
+
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
-def Connect():
+def connect():
     conn = None
     try:
         conn = psycopg2.connect(
@@ -23,17 +24,18 @@ def Connect():
     return conn
 
 
-def queryData(conn, Query):
+def queryData(conn, query):
     cursor = None
     try:
         cursor = conn.cursor(cursor_factory=RealDictCursor)
-        cursor.execute(Query)
-        for queryType in ["INSERT", "UPDATE","DELETE","PATCH"]:
-            if queryType in Query:
+        cursor.execute(query)
+        for queryType in ["INSERT", "UPDATE", "DELETE", "PATCH", "insert", "update", "delete", "patch"]:
+            if queryType in query:
                 conn.commit()
 
                 break
     except (Exception, psycopg2.Error) as error:
+        logger.error(query)
         logger.error("ERROR:Quering Failed with error {0}", str(error))
     return cursor
 

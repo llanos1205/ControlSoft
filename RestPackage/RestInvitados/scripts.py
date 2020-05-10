@@ -1,9 +1,17 @@
 # generic queries
-get_query = "Select {keys} from {table};"
-put_query = "insert into {table}({keys}) values({values});"
-update_query = "Update {table} set {changes} where {cond};"
-delete_query = "delete from {table} where {cond}"
+getQuery = "select {keys} from {table} {cond};"
+putQuery = "insert into {table}({keys}) values({values});"
+updateQuery = "update {table} set {changes} where {cond};"
+deleteQuery = "delete from {table} where {cond}"
 
 
-def key_value_parser(dict):
-    return ",".join(dict.keys()), ",".join(map(lambda x: "'" + x + "'" if type(x) is str else str(x), dict.values()))
+def keyValueParser(obj):
+    values = ",".join(map(lambda x: "'" + x + "'" if type(x) is str else str(x), obj.values()))
+    keys = ",".join(map(lambda x: "\"" + x + "\"", obj.keys()))
+    return keys, values
+
+
+def keyValueComparerParser(obj):
+    return ",".join(
+        map(lambda x: ("\"" + x + "\"='" + obj[x] + "'") if type(obj[x]) is str else (
+                    "\"" + x + "\"=" + str(obj[x])), obj.keys()))

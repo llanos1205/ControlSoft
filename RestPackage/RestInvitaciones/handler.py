@@ -27,8 +27,9 @@ def handler(event, context):
     if method == "GET":
         try:
             if identifier:
-                cond = str("where idpersona={}".format(identifier))
-            query = scripts.getQuery.format(keys="idpersona,nombre1,correo", table="persona", cond=cond)
+                cond = str("where idInvitacion={}".format(identifier))
+            keys = ""
+            query = scripts.getQuery.format(keys=keys, table="idInvitacion", cond=cond)
 
             cursor = db.queryData(CONN, str(query))
             resp = db.getJson(cursor)
@@ -42,7 +43,7 @@ def handler(event, context):
         try:
             body = getBody(event)
             keys, values = scripts.keyValueParser(body)
-            query = scripts.putQuery.format(table="persona", keys=keys, values=values)
+            query = scripts.putQuery.format(table="Invitacion", keys=keys, values=values)
             # proceso de crear un link/QR mejor usar SNS
             cursor = db.queryData(CONN, str(query))
             return responseAgw(200, "Insert Success")
@@ -54,7 +55,7 @@ def handler(event, context):
 
         try:
             body = getBody(event)
-            query = scripts.updateQuery.format(table="persona", changes="", cond="")
+            query = scripts.updateQuery.format(table="Invitacion", changes="", cond="")
             cursor = db.queryData(CONN, query)
             return responseAgw(200, "Changes effective")
         except Exception as error:
@@ -64,8 +65,8 @@ def handler(event, context):
         try:
             body = getBody(event)
             if identifier:
-                cond = str("where idpersona={}".format(identifier))
-            query = scripts.deleteQuery.format(table="persona", cond=cond)
+                cond = str("where idInvitacion={}".format(identifier))
+            query = scripts.deleteQuery.format(table="Invitacion", cond=cond)
             cursor = db.queryData(CONN, str(query))
             return responseAgw(200, "Changes effective")
         except Exception as error:
@@ -75,9 +76,9 @@ def handler(event, context):
         try:
             body = getBody(event)
             if identifier:
-                cond = str("idpersona={}".format(identifier))
+                cond = str("idInvitacion={}".format(identifier))
             changes = str(scripts.keyValueComparerParser(body))
-            query = scripts.updateQuery.format(table="persona", changes=changes, cond=cond)
+            query = scripts.updateQuery.format(table="Invitacion", changes=changes, cond=cond)
             cursor = db.queryData(CONN, str(query))
             return responseAgw(200, "Changes effective")
         except Exception as error:
