@@ -18,29 +18,34 @@ def get_secret_hash(username):
     d2 = base64.b64encode(dig).decode()
     return d2
 def lambda_handler(event, context):
-    for field in ["username", "email", "password", "name"]:
+    for field in [ "email", "password"]:
         if not event.get(field):
             return {"error": False, "success": True, 'message': f"{field} is not present", "data": None}
-    username = event['username']
+    #username = event['username']
     email = event["email"]
     password = event['password']
-    name = event["name"]
+    phone_number=event['phone_number']
+    #name = event["name"]
     client = boto3.client('cognito-idp')
     try:
         resp = client.sign_up(
             ClientId=CLIENT_ID,
-            SecretHash=get_secret_hash(username),
-            Username=username,
+            SecretHash=get_secret_hash(email),
+            Username=email,
             Password=password, 
             UserAttributes=[
-            {
-                'Name': "name",
-                'Value': name
-            },
+            # {
+            #     'Name': "name",
+            #     'Value': name
+            # },
             {
                 'Name': "email",
                 'Value': email
-            }
+            },
+            {
+                'Name': "phone_number",
+                'Value': phone_number
+            },
             ],
             ValidationData=[
                 {
@@ -48,9 +53,13 @@ def lambda_handler(event, context):
                 'Value': email
             },
             {
-                'Name': "custom:username",
-                'Value': username
+                'Name':"phone_number",
+                'Value':phone_number
             }
+            # {
+            #     'Name': "custom:username",
+            #     'Value': username
+            # }
 ])
     
     
